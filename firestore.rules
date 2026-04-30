@@ -11,12 +11,19 @@ service cloud.firestore {
              );
     }
 
-    // Coleções públicas do site
+    // Coleções públicas do site (leitura)
     match /highlights/{id} { allow read: if true; }
     match /trophies/{id} { allow read: if true; }
     match /transparency/{id} { allow read: if true; }
     match /news/{id} { allow read: if true; }
+    match /players/{id} { allow read: if true; }
+    match /board/{id} { allow read: if true; }
+    match /campaigns/{id} { allow read: if true; }
     match /test/connection { allow read: if true; }
+
+    // Coleções públicas para envio de formulários (escrita)
+    match /registrations/{id} { allow create: if true; }
+    match /socio_leads/{id} { allow create: if true; }
 
     // user_permissions: qualquer um pode verificar um e-mail específico (GET)
     // mas só autenticados podem listar e só admin pode escrever

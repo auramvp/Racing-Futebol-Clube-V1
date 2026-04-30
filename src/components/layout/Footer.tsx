@@ -83,23 +83,28 @@ export default function Footer() {
             href="https://auramvp.online" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex flex-col md:flex-row items-center gap-4 md:gap-8 bg-white/5 hover:bg-white text-gray-400 hover:text-black px-10 py-5 rounded-full border border-white/10 transition-all duration-500 group shadow-2xl"
+            className="flex items-center gap-4 md:gap-10 bg-white/5 hover:bg-white text-gray-400 hover:text-black px-6 py-3.5 md:px-12 md:py-6 rounded-full border border-white/10 transition-all duration-500 group shadow-2xl"
           >
-            <div className="flex items-center gap-4">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 group-hover:text-black/50 transition-colors">Desenvolvido por</span>
-              <div className="flex items-center gap-3 border-r border-white/10 group-hover:border-black/10 pr-8">
-                <img src="/aura.png" alt="Aura Logo" className="h-6 w-auto grayscale group-hover:grayscale-0 transition-all duration-500" />
-                <span className="text-[7px] font-bold uppercase tracking-widest text-gray-600 group-hover:text-black/60 transition-colors">Desenvolvemos Sites, Sistemas, Aplicativos</span>
+            {/* Logo and Brand */}
+            <div className="flex items-center gap-3">
+              <img src="/aura.png" alt="Aura Logo" className="h-4 md:h-7 w-auto grayscale group-hover:grayscale-0 transition-all duration-500" />
+              <div className="hidden md:flex flex-col -space-y-1 border-l border-white/10 group-hover:border-black/10 pl-4">
+                <span className="text-[11px] font-black uppercase tracking-tighter text-gray-400 group-hover:text-black transition-colors">Aura</span>
+                <span className="text-[7px] font-bold uppercase tracking-widest text-gray-600 group-hover:text-black/60 transition-colors whitespace-nowrap">Desenvolvemos Sites, Sistemas, Aplicativos</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col items-center md:items-start -space-y-0.5">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Quero um site pro meu time</span>
-                <span className="text-[9px] font-bold opacity-40 group-hover:opacity-60 transition-opacity">auramvp.online</span>
+            {/* Separator */}
+            <div className="h-4 md:h-6 w-[1px] bg-white/10 group-hover:bg-black/10 transition-colors" />
+
+            {/* CTA */}
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="flex flex-col -space-y-1">
+                <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.25em]">Quero um site</span>
+                <span className="text-[8px] md:text-[10px] font-bold opacity-40 group-hover:opacity-60 transition-opacity">auramvp.online</span>
               </div>
-              <div className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-black/10 flex items-center justify-center text-white group-hover:text-black transition-all shadow-lg border border-white/10 group-hover:border-black/10">
-                <ArrowRight size={14} />
+              <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-white/10 group-hover:bg-black/10 flex items-center justify-center text-white group-hover:text-black transition-all border border-white/10 group-hover:border-black/10">
+                <ArrowRight size={12} className="md:w-4 md:h-4" />
               </div>
             </div>
           </a>
