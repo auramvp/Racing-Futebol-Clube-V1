@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "Highlight": {
+      "title": "Application Highlight",
+      "description": "Content for the hero section",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "buttonText": { "type": "string" },
+        "buttonLink": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "buttonText", "buttonLink"]
+    },
+    "Trophy": {
+      "title": "Club Trophy",
+      "description": "Achievement or title won by the club",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "year": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "order": { "type": "integer" }
+      },
+      "required": ["title", "year", "description", "imageUrl"]
+    },
+    "TransparencyReport": {
+      "title": "Transparency Report",
+      "description": "Financial or legal report",
+      "type": "object",
+      "properties": {
+        "year": { "type": "string" },
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "content": { "type": "string" },
+        "datePublished": { "type": "string" },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string", "enum": ["pdf", "image"] },
+              "url": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["year", "title", "content", "datePublished"]
+    }
+  },
+  "firestore": {
+    "highlights": {
+      "schema": "Highlight",
+      "description": "Global section highlights"
+    },
+    "trophies": {
+      "schema": "Trophy",
+      "description": "Club honors and trophies gallery"
+    },
+    "transparency": {
+      "schema": "TransparencyReport",
+      "description": "Transparency and accountability reports"
+    }
+  }
+}
