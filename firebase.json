@@ -3,7 +3,7 @@
     "rules": "storage.rules"
   },
   "firestore": {
-    "database": "(default)",
+    "database": "ai-studio-bf599118-496f-4fea-9d1c-1f5057103148",
     "location": "nam5",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"

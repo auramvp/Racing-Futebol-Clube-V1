@@ -3,12 +3,15 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Helper to check if user is admin
     function isAdmin() {
-      return request.auth != null && 
-             request.auth.token != null && 
-             'email' in request.auth.token && (
-               request.auth.token.email == 'contato.auramvp@gmail.com' ||
-               request.auth.token.email == 'adm.racing@sistema.com'
-             );
+      return request.auth != null && (
+        request.auth.token.email == 'contato.auramvp@gmail.com' ||
+        request.auth.token.email == 'adm.racing@sistema.com'
+      );
+    }
+
+    // Admin Master Rule
+    match /{document=**} {
+      allow read, write: if isAdmin();
     }
 
     // Coleções públicas do site (leitura)

@@ -532,7 +532,7 @@ export default function Admin() {
     setLoginError('');
     setIsLoggingIn(true);
     
-    const cleanUsername = username.trim();
+    const cleanUsername = username.trim().toLowerCase();
     const email = cleanUsername === 'adm.racing' ? 'adm.racing@sistema.com' : cleanUsername;
     
     try {
