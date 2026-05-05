@@ -114,28 +114,59 @@ export default function NewsDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const fetchItem = async () => {
-    if (!id) return;
-    try {
-      const docRef = doc(db, 'news', id);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setItem({ id: docSnap.id, ...data } as NewsItem);
-        
-        // Incrementar visualizações de forma silenciosa
-        updateDoc(docRef, {
-          views: increment(1)
-        }).catch(e => console.error("Erro ao incrementar views:", e));
+    const fetchItem = async () => {
+      if (!id) return;
+      try {
+        const docRef = doc(db, 'news', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setItem({ id: docSnap.id, ...data } as NewsItem);
+          
+          // Incrementar visualizações de forma silenciosa
+          updateDoc(docRef, {
+            views: increment(1)
+          }).catch(e => console.error("Erro ao incrementar views:", e));
+        }
+      } catch (error) {
+        console.error("Error fetching news detail:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching news detail:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
     fetchItem();
   }, [id]);
+
+  useEffect(() => {
+    if (item) {
+      document.title = `${item.title} | Racing FC`;
+      
+      // Atualizar meta tags dinamicamente (ajuda no SEO e compartilhamento)
+      const updateMeta = (name: string, content: string, property = false) => {
+        const selector = property ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+        let el = document.querySelector(selector);
+        if (!el) {
+          el = document.createElement('meta');
+          if (property) el.setAttribute('property', name);
+          else el.setAttribute('name', name);
+          document.head.appendChild(el);
+        }
+        el.setAttribute('content', content);
+      };
+
+      const description = item.summary || 'Notícia do Racing Futebol Clube';
+      updateMeta('description', description);
+      updateMeta('og:title', item.title, true);
+      updateMeta('og:description', description, true);
+      updateMeta('og:image', item.imageUrl || 'https://racing-futebol-clube-v1.vercel.app/racing-fc.png', true);
+      updateMeta('twitter:title', item.title, true);
+      updateMeta('twitter:description', description, true);
+    }
+    
+    return () => {
+      document.title = 'Racing Futebol Clube | Site Oficial';
+    };
+  }, [item]);
 
   if (loading) {
     return (
