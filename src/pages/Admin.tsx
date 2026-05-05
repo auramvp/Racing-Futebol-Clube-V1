@@ -44,9 +44,26 @@ import {
   CheckCircle2,
   Link as LinkIcon,
   UserPlus,
+  ArrowUpRight,
 } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { motion, AnimatePresence } from 'motion/react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+
+// Configuração para usar estilos inline em vez de classes (melhor para o Shadow DOM do site)
+const Quill = (ReactQuill as any).Quill;
+if (Quill) {
+  const Size = Quill.import('attributors/style/size');
+  Size.whitelist = ['0.75em', '1em', '1.5em', '2.5em'];
+  Quill.register(Size, true);
+
+  const Color = Quill.import('attributors/style/color');
+  Quill.register(Color, true);
+
+  const Align = Quill.import('attributors/style/align');
+  Quill.register(Align, true);
+}
 
 export default function Admin() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -56,6 +73,28 @@ export default function Admin() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
   const [confirmModal, setConfirmModal] = useState<{message: string, onConfirm: () => void} | null>(null);
+
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'size': ['0.75em', '1em', '1.5em', '2.5em'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+  };
+
+  const quillFormats = [
+    'header', 'size',
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background',
+    'list', 'bullet',
+    'align',
+    'link', 'image'
+  ];
   const [isAddingCampaign, setIsAddingCampaign] = useState(false);
   const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
   const [campaignType, setCampaignType] = useState<'popup' | 'card' | null>(null);
@@ -1401,8 +1440,17 @@ export default function Admin() {
                         </div>
                       </div>
                       <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Conteúdo da Notícia (HTML permitido)</label>
-                        <textarea value={newArticle.content} onChange={e => setNewArticle({...newArticle, content: e.target.value})} rows={10} className={`w-full ${theme === 'dark' ? 'bg-black border-white/5 text-white' : 'bg-gray-50 border-gray-200 text-zinc-900'} border p-4 text-sm outline-none focus:border-red-600 transition-colors`} />
+                        <label className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Conteúdo da Notícia</label>
+                        <div className={`rich-text-editor ${theme === 'dark' ? 'dark-quill' : ''}`}>
+                          <ReactQuill 
+                            theme="snow"
+                            value={newArticle.content} 
+                            onChange={content => setNewArticle({...newArticle, content})}
+                            modules={quillModules}
+                            formats={quillFormats}
+                            className={`${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-50 text-zinc-900'} min-h-[300px] border-white/5`}
+                          />
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-3 justify-end pt-4">
@@ -1431,19 +1479,33 @@ export default function Admin() {
                       <div>
                         <div className="text-red-600 text-[10px] font-black italic tracking-wider uppercase">{n.date} | {n.category}</div>
                         <h4 className={`text-sm font-black uppercase italic leading-tight ${theme === 'dark' ? 'text-white' : 'text-zinc-900'}`}>{n.title}</h4>
+                        <div className="flex items-center gap-3 mt-1 text-[9px] font-bold text-gray-500 uppercase">
+                          <div className="flex items-center gap-1">
+                            <Eye size={10} className="text-red-600" />
+                            {n.views || 0} leituras
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
+                      <Link 
+                        to={`/noticias/${n.id}`} 
+                        target="_blank"
+                        className={`p-2 transition-all rounded-sm ${theme === 'dark' ? 'text-gray-500 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-red-600 hover:bg-gray-100'}`}
+                        title="Ver no Site"
+                      >
+                        <ArrowUpRight size={16} />
+                      </Link>
                       <button 
                         onClick={() => handleEditClick(n)} 
-                        className="p-3 text-gray-500 hover:text-white hover:bg-white/10 rounded-sm transition-all"
+                        className={`p-2 transition-all rounded-sm ${theme === 'dark' ? 'text-gray-500 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-red-600 hover:bg-gray-100'}`}
                         title="Editar Notícia"
                       >
                         <Edit3 size={16} />
                       </button>
                       <button 
                         onClick={() => handleDeleteNews(n.id)} 
-                        className="p-3 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-sm transition-all"
+                        className={`p-2 transition-all rounded-sm ${theme === 'dark' ? 'text-gray-500 hover:text-red-500 hover:bg-red-500/10' : 'text-gray-400 hover:text-red-500 hover:bg-red-50'}`}
                         title="Excluir Notícia"
                       >
                         <Trash2 size={16} />

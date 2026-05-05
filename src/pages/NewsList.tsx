@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { Calendar, User, ArrowRight, Newspaper } from 'lucide-react';
+import { Calendar, User, ArrowRight, Newspaper, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface NewsItem {
@@ -14,6 +14,7 @@ interface NewsItem {
   date: any;
   author: string;
   category: string;
+  views?: number;
 }
 
 export default function NewsList() {
@@ -107,6 +108,12 @@ export default function NewsList() {
                       <User size={12} className="text-red-600" />
                       {item.author || 'Racing FC'}
                     </div>
+                    {item.views !== undefined && (
+                      <div className="flex items-center gap-1.5">
+                        <Eye size={12} className="text-red-600" />
+                        {item.views || 0}
+                      </div>
+                    )}
                   </div>
 
                   <h2 className="text-2xl font-black text-black uppercase italic tracking-tighter mb-4 leading-tight group-hover:text-red-600 transition-colors">
@@ -114,7 +121,7 @@ export default function NewsList() {
                   </h2>
 
                   <p className="text-gray-600 font-medium text-sm leading-relaxed mb-8 flex-1 line-clamp-3">
-                    {(item as any).subtitle || item.summary || item.content?.substring(0, 150) + '...'}
+                    {(item as any).subtitle || item.summary || item.content?.replace(/<[^>]*>/g, '').substring(0, 150) + '...'}
                   </p>
 
                   <Link 

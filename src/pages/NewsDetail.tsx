@@ -2,8 +2,8 @@ import { motion } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { db } from '../lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { Calendar, User, ArrowLeft, Share2, Facebook, Instagram } from 'lucide-react';
+import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { Calendar, User, ArrowLeft, Share2, Facebook, Instagram, Eye } from 'lucide-react';
 
 function NewsContent({ html }: { html: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -14,27 +14,82 @@ function NewsContent({ html }: { html: string }) {
       const shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
       
       const baseStyle = `
-        :host { display: block; width: 100%; }
-        .article-body {
-          font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-          color: #1a1a1a;
-          line-height: 1.8;
-          font-size: 1.15rem;
+        :host { 
+          display: block; 
+          width: 100%; 
+          overflow: hidden; 
+          max-width: 100%; 
         }
-        img { max-width: 100%; height: auto; display: block; margin: 2.5rem auto; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #000; margin-top: 2.5rem; margin-bottom: 1.5rem; font-weight: 800; text-transform: uppercase; font-style: italic; }
+        .article-body {
+          font-family: 'Inter', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          color: #1F2123;
+          line-height: 1.65;
+          font-size: 18px;
+          font-weight: 400;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+          overflow: hidden;
+          max-width: 100%;
+        }
+        .article-body p, .article-body span {
+          font-weight: 400;
+        }
+        .article-body strong, .article-body b {
+          font-weight: 700;
+          color: #111;
+        }
+        img { max-width: 100%; height: auto; display: block; margin: 2.5rem auto; border-radius: 0.5rem; }
+        h1, h2, h3, h4, h5, h6 { 
+          color: #111; 
+          margin-top: 3rem; 
+          margin-bottom: 1.5rem; 
+          font-weight: 700; 
+          line-height: 1.3; 
+          font-size: 1.5rem;
+        }
         p { margin-bottom: 1.8rem; }
-        a { color: #c40000; font-weight: bold; text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.3s; }
-        a:hover { border-bottom-color: #c40000; }
-        ul, ol { margin-bottom: 2rem; padding-left: 1.5rem; }
-        li { margin-bottom: 0.5rem; }
-        blockquote { border-left: 4px solid #c40000; padding-left: 1.5rem; margin: 2rem 0; font-style: italic; color: #4b5563; }
+        a { color: #0044cc; text-decoration: underline; font-weight: 500; }
+        a:hover { color: #0033aa; }
+        ul, ol { margin-bottom: 1.8rem; padding-left: 1.5rem; }
+        li { margin-bottom: 0.75rem; }
+        blockquote { 
+          border-left: 4px solid #e5e7eb; 
+          padding-left: 1.5rem; 
+          margin: 2.5rem 0; 
+          font-style: italic; 
+          color: #4b5563;
+          font-size: 1.25rem;
+        }
+        .ql-align-center { text-align: center; }
+        .ql-align-right { text-align: right; }
+        .ql-align-justify { text-align: justify; }
+        pre { background: #f9fafb; padding: 1.25rem; border-radius: 8px; overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9rem; border: 1px solid #e5e7eb; }
       `;
 
       shadow.innerHTML = `
         <style>${baseStyle}</style>
         <div class="article-body">${html}</div>
       `;
+
+      // Corrigir links sem protocolo (ex: www.google.com -> https://www.google.com)
+      const links = shadow.querySelectorAll('a');
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && 
+            !href.match(/^[a-z]+:\/\//i) && 
+            !href.startsWith('/') && 
+            !href.startsWith('#') && 
+            !href.startsWith('mailto:') &&
+            !href.startsWith('tel:')) {
+          link.setAttribute('href', `https://${href}`);
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        } else if (href && (href.startsWith('http') || href.startsWith('//'))) {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
     }
   }, [html]);
 
@@ -50,6 +105,7 @@ interface NewsItem {
   date: any;
   author: string;
   category: string;
+  views?: number;
 }
 
 export default function NewsDetail() {
@@ -58,20 +114,26 @@ export default function NewsDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchItem = async () => {
-      if (!id) return;
-      try {
-        const docRef = doc(db, 'news', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setItem({ id: docSnap.id, ...docSnap.data() } as NewsItem);
-        }
-      } catch (error) {
-        console.error("Error fetching news detail:", error);
-      } finally {
-        setLoading(false);
+  const fetchItem = async () => {
+    if (!id) return;
+    try {
+      const docRef = doc(db, 'news', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setItem({ id: docSnap.id, ...data } as NewsItem);
+        
+        // Incrementar visualizações de forma silenciosa
+        updateDoc(docRef, {
+          views: increment(1)
+        }).catch(e => console.error("Erro ao incrementar views:", e));
       }
-    };
+    } catch (error) {
+      console.error("Error fetching news detail:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
     fetchItem();
   }, [id]);
 
@@ -116,7 +178,7 @@ export default function NewsDetail() {
               <span className="bg-red-600 text-white px-4 py-1 font-black text-xs uppercase tracking-widest shadow-2xl">
                 {item.category || 'Geral'}
               </span>
-              <h1 className="text-4xl md:text-6xl font-black text-black uppercase italic tracking-tighter leading-[0.9] drop-shadow-sm">
+              <h1 className="text-3xl md:text-5xl font-black text-black uppercase italic tracking-normal leading-[1.1] drop-shadow-sm">
                 {item.title}
               </h1>
             </motion.div>
@@ -144,6 +206,15 @@ export default function NewsDetail() {
                 <span className="text-sm font-bold text-black">{item.author || 'Racing FC'}</span>
               </div>
             </div>
+            {item.views !== undefined && (
+              <div className="flex items-center gap-2">
+                <Eye size={18} className="text-red-600" />
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase text-gray-400">Visualizações</span>
+                  <span className="text-sm font-bold text-black">{item.views || 0}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -160,7 +231,7 @@ export default function NewsDetail() {
           </div>
         </div>
 
-        <div className="max-w-none pb-20">
+        <div className="max-w-3xl mx-auto pb-20">
           <NewsContent html={item.content} />
         </div>
 

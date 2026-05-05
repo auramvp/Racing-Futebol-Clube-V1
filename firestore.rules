@@ -18,7 +18,10 @@ service cloud.firestore {
     match /highlights/{id} { allow read: if true; }
     match /trophies/{id} { allow read: if true; }
     match /transparency/{id} { allow read: if true; }
-    match /news/{id} { allow read: if true; }
+    match /news/{id} { 
+      allow read: if true; 
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
+    }
     match /players/{id} { allow read: if true; }
     match /board/{id} { allow read: if true; }
     match /campaigns/{id} { allow read: if true; }

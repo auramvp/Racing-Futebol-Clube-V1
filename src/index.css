@@ -10,3 +10,42 @@
     @apply bg-black text-white antialiased;
   }
 }
+
+/* Quill Editor Customizations */
+.dark-quill .ql-toolbar {
+  background-color: #18181b;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-quill .ql-container {
+  background-color: #000;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-quill .ql-stroke {
+  stroke: #9ca3af !important;
+}
+
+.dark-quill .ql-fill {
+  fill: #9ca3af !important;
+}
+
+.dark-quill .ql-picker {
+  color: #9ca3af !important;
+}
+
+.dark-quill .ql-editor {
+  color: #fff;
+  min-height: 250px;
+}
+
+.rich-text-editor .ql-toolbar {
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
+.rich-text-editor .ql-container {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  font-family: inherit;
+}
